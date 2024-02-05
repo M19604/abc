@@ -1,0 +1,296 @@
+<style>
+    body {
+        margin: 0;
+        background-color: #111;
+        font-family: monospace;
+        color: #fff;
+        overflow: hidden;
+        user-select: none;
+    }
+
+    #output,
+    #input,
+    #key,
+    .rotor {
+        height: 10%;
+        width: 94%;
+        border: .15vw solid #333;
+        position: absolute;
+        left: 3%;
+        border-radius: 1vw;
+    }
+
+    .rotor div {
+        position: absolute;
+        font-size: 1vw;
+        padding: 1vw;
+    }
+
+    #output,
+    #input {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45%;
+        font-size: 1.5vw;
+        height: 10%;
+        bottom: 50%;
+    }
+
+    #input {
+        color: #999;
+    }
+
+    #output,
+    #input,
+    #key {
+        background-color: transparent;
+        color: #fff;
+        padding-left: 1vw;
+        padding-right: 1vw;
+        outline: none;
+        text-transform: uppercase;
+    }
+
+    #status {
+        width: 92%;
+        height: 5%;
+        display: flex;
+        align-items: center;
+        color: #999;
+        font-size: 1vw;
+        position: absolute;
+        left: 4%;
+        bottom: 62%;
+    }
+</style>
+<div class="rotor" id="rotor1" style="bottom: 26%">
+<div id="r11" style="top: 2%;"></div>
+<div id="r12" style="bottom: 2%;"></div>
+</div>
+<div class="rotor" id="rotor2" style="bottom: 14%">
+<div id="r21" style="top: 2%;"></div>
+<div id="r22" style="bottom: 2%;"></div>
+</div>
+<div class="rotor" id="rotor3" style="bottom: 2%">
+<div id="r31" style="top: 2%;"></div>
+<div id="r32" style="bottom: 2%;"></div>
+</div>
+<div id="output" onclick="navigator.clipboard.writeText(this.textContent)" style="position: absolute; left: 50%"></div>
+<input id="input" placeholder="TYPE HERE">
+<input id="key" placeholder="KEY" maxlength="6" style="bottom: 38%">
+<div id="status">ENCODING</div>
+<script>
+    var key = "";
+    var r1, r2, r3, r4, r5, r6 = "";
+    var alpha = "AB1CD2EF3GH4IJ5KL6MN7OP8QR9ST0UVWXYZ";
+    var cycle = 0;
+    var input = document.getElementById("input");
+    var output = document.getElementById("output");
+    var mode = "encode";
+    function getRotor(id, num) {
+        document.getElementById(id).innerHTML = "";
+        var alphabet = alpha;
+        if (alpha.indexOf(key[num]) === 0) {
+            for (let a = 0; a < alpha.length; a++) {
+                document.getElementById(id).innerHTML += `${alpha[a]}`;
+            }
+            for (let b = 0; b < alphabet.length; b++) {
+                    document.getElementById(id).innerHTML += `${alphabet[b]}`;
+                if (id === "r11") {
+                    r1 += alphabet[b];
+                    r1 = r1.replace("undefined", "");
+                } else if (id === "r12") {
+                    r2 += alphabet[b];
+                    r2 = r2.replace("undefined", "");
+                } else if (id === "r21") {
+                    r3 += alphabet[b];
+                    r3 = r3.replace("undefined", "");
+                } else if (id === "r22") {
+                    r4 += alphabet[b];
+                    r4 = r4.replace("undefined", "");
+                } else if (id === "r31") {
+                    r5 += alphabet[b];
+                    r5 = r5.replace("undefined", "");
+                } else if (id === "r32") {
+                    r6 += alphabet[b];
+                    r6 = r6.replace("undefined", "");
+                }
+            }
+        } else {
+            for (let a = 0; a < alpha.indexOf(key[num]); a++) {
+                var letter = alphabet[0];
+                alphabet = alphabet.substring(1) + letter;
+                if (a === alpha.indexOf(key[num]) - 1) {
+                    for (let b = 0; b < alphabet.length; b++) {
+                        document.getElementById(id).innerHTML += `${alphabet[b]}`;
+                        if (id === "r11") {
+                            r1 += alphabet[b];
+                            r1 = r1.replace("undefined", "");
+                        } else if (id === "r12") {
+                            r2 += alphabet[b];
+                            r2 = r2.replace("undefined", "");
+                        } else if (id === "r21") {
+                            r3 += alphabet[b];
+                            r3 = r3.replace("undefined", "");
+                        } else if (id === "r22") {
+                            r4 += alphabet[b];
+                            r4 = r4.replace("undefined", "");
+                        } else if (id === "r31") {
+                            r5 += alphabet[b];
+                            r5 = r5.replace("undefined", "");
+                        } else if (id === "r32") {
+                            r6 += alphabet[b];
+                            r6 = r6.replace("undefined", "");
+                        }
+                    }
+                }
+            }
+        }
+    }
+    function getRotors() {
+        getRotor("r11", 0);
+        getRotor("r12", 1);
+        getRotor("r21", 2);
+        getRotor("r22", 3);
+        getRotor("r31", 4);
+        getRotor("r32", 5);
+    }
+    window.onload = function() {
+        getRotors();
+    }
+    input.addEventListener("keyup", e => {
+        if (e.key === " ") {
+            input.textContent += " ";
+            output.textContent += " ";
+        } else if (e.key === "Control") {
+            if (mode === "encode") {
+                mode = "decode";
+                document.getElementById("status").textContent = "DECODING";
+            } else {
+                mode = "encode";
+                document.getElementById("status").textContent = "ENCODING";
+            }
+        } else if (e.key === "Backspace") {
+            r1,r2,r3,r4,r5,r6 = "";
+            getRotors();
+            input.value = "";
+            output.textContent = "";
+            cycle = 0;
+        } else if (alpha.includes(e.key.toUpperCase())) {
+        if (mode === "encode") {
+        input.textContent += e.key.toUpperCase();
+        var e1 = r1.indexOf(e.key.toUpperCase());
+        var e2 = r2[e1];
+        var e3 = r3.indexOf(e2);
+        var e4 = r4[e3];
+        var e5 = r5.indexOf(e4);
+        var e6 = r6[e5];
+        output.textContent += e6;
+        cycle += 1;
+        var rotor = cycle%6+1;
+        if (rotor === 1) {
+            var letter = r1[0];
+            r1 = r1.substring(1)+letter;
+            document.getElementById("r11").innerHTML = "";
+            for (let i = 0; i < r1.length; i++) {
+                document.getElementById("r11").innerHTML += `${r1[i]}`;
+            }
+        } else if (rotor === 2) {
+            var letter = r2[0];
+            r2 = r2.substring(1)+letter;
+            document.getElementById("r12").innerHTML = "";
+            for (let i = 0; i < r2.length; i++) {
+                document.getElementById("r12").innerHTML += `${r2[i]}`;
+            }
+        } else if (rotor === 3) {
+            var letter = r3[0];
+            r3 = r3.substring(1)+letter;
+            document.getElementById("r21").innerHTML = "";
+            for (let i = 0; i < r3.length; i++) {
+                document.getElementById("r21").innerHTML += `${r3[i]}`;
+            }
+        } else if (rotor === 4) {
+            var letter = r4[0];
+            r4 = r4.substring(1)+letter;
+            document.getElementById("r22").innerHTML = "";
+            for (let i = 0; i < r4.length; i++) {
+                document.getElementById("r22").innerHTML += `${r4[i]}`;
+            }
+        } else if (rotor === 5) {
+            var letter = r5[0];
+            r5 = r5.substring(1)+letter;
+            document.getElementById("r31").innerHTML = "";
+            for (let i = 0; i < r5.length; i++) {
+                document.getElementById("r31").innerHTML += `${r5[i]}`;
+            }
+        } else if (rotor === 6) {
+            var letter = r6[0];
+            r6 = r6.substring(1)+letter;
+            document.getElementById("r32").innerHTML = "";
+            for (let i = 0; i < r6.length; i++) {
+                document.getElementById("r32").innerHTML += `${r6[i]}`;
+            }
+        }
+    } else if (mode === "decode") {
+        input.textContent += e.key.toUpperCase();
+        var d1 = r6.indexOf(e.key.toUpperCase());
+        var d2 = r5[d1];
+        var d3 = r4.indexOf(d2);
+        var d4 = r3[d3];
+        var d5 = r2.indexOf(d4)
+        var d6 = r1[d5];
+        output.textContent += d6;
+        cycle += 1;
+        var rotor = cycle%6+1;
+        if (rotor === 1) {
+            var letter = r1[0];
+            r1 = r1.substring(1)+letter;
+            document.getElementById("r11").innerHTML = "";
+            for (let i = 0; i < r1.length; i++) {
+                document.getElementById("r11").innerHTML += `${r1[i]}`;
+            }
+        } else if (rotor === 2) {
+            var letter = r2[0];
+            r2 = r2.substring(1)+letter;
+            document.getElementById("r12").innerHTML = "";
+            for (let i = 0; i < r2.length; i++) {
+                document.getElementById("r12").innerHTML += `${r2[i]}`;
+            }
+        } else if (rotor === 3) {
+            var letter = r3[0];
+            r3 = r3.substring(1)+letter;
+            document.getElementById("r21").innerHTML = "";
+            for (let i = 0; i < r3.length; i++) {
+                document.getElementById("r21").innerHTML += `${r3[i]}`;
+            }
+        } else if (rotor === 4) {
+            var letter = r4[0];
+            r4 = r4.substring(1)+letter;
+            document.getElementById("r22").innerHTML = "";
+            for (let i = 0; i < r4.length; i++) {
+                document.getElementById("r22").innerHTML += `${r4[i]}`;
+            }
+        } else if (rotor === 5) {
+            var letter = r5[0];
+            r5 = r5.substring(1)+letter;
+            document.getElementById("r31").innerHTML = "";
+            for (let i = 0; i < r5.length; i++) {
+                document.getElementById("r31").innerHTML += `${r5[i]}`;
+            }
+        } else if (rotor === 6) {
+            var letter = r6[0];
+            r6 = r6.substring(1)+letter;
+            document.getElementById("r32").innerHTML = "";
+            for (let i = 0; i < r6.length; i++) {
+                document.getElementById("r32").innerHTML += `${r6[i]}`;
+            }
+        }
+    }
+    }
+    })
+    document.getElementById("key").addEventListener("keyup", e => {
+        key = document.getElementById("key").value.toUpperCase();
+        getRotors();
+    })
+</script>
