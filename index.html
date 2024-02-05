@@ -1,3 +1,4 @@
+<title>Luke Code</title>
 <style>
     body {
         margin: 0;
@@ -6,6 +7,11 @@
         color: #fff;
         overflow: hidden;
         user-select: none;
+    }
+
+    ::selection {
+        color: #000;
+        background-color: #fff;
     }
 
     #output,
@@ -18,6 +24,7 @@
         position: absolute;
         left: 3%;
         border-radius: 1vw;
+        box-sizing: border-box;
     }
 
     .rotor div {
@@ -31,7 +38,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 45%;
+        width: 46%;
         font-size: 1.5vw;
         height: 10%;
         bottom: 50%;
@@ -47,21 +54,28 @@
         background-color: transparent;
         color: #fff;
         padding-left: 1vw;
-        padding-right: 1vw;
         outline: none;
         text-transform: uppercase;
     }
 
+    #warning,
     #status {
         width: 92%;
-        height: 5%;
-        display: flex;
-        align-items: center;
+        height: 3%;
         color: #999;
         font-size: 1vw;
         position: absolute;
         left: 4%;
         bottom: 62%;
+    }
+
+    #warning {
+        text-align: right;
+    }
+
+    #output {
+        padding: 0;
+        left: 51%;
     }
 </style>
 <div class="rotor" id="rotor1" style="bottom: 26%">
@@ -76,10 +90,11 @@
 <div id="r31" style="top: 2%;"></div>
 <div id="r32" style="bottom: 2%;"></div>
 </div>
-<div id="output" onclick="navigator.clipboard.writeText(this.textContent)" style="position: absolute; left: 50%"></div>
+<div id="output" onclick="navigator.clipboard.writeText(this.textContent)"></div>
 <input id="input" placeholder="TYPE HERE">
 <input id="key" placeholder="KEY" maxlength="6" style="bottom: 38%">
 <div id="status">ENCODING</div>
+<div id="warning"><b>WARNING: </b>REFRESH AFTER EACH USE</div>
 <script>
     var key = "";
     var r1, r2, r3, r4, r5, r6 = "";
@@ -92,9 +107,6 @@
         document.getElementById(id).innerHTML = "";
         var alphabet = alpha;
         if (alpha.indexOf(key[num]) === 0) {
-            for (let a = 0; a < alpha.length; a++) {
-                document.getElementById(id).innerHTML += `${alpha[a]}`;
-            }
             for (let b = 0; b < alphabet.length; b++) {
                     document.getElementById(id).innerHTML += `${alphabet[b]}`;
                 if (id === "r11") {
@@ -157,11 +169,15 @@
         getRotor("r32", 5);
     }
     window.onload = function() {
-        getRotors();
+        input.focus();
+        if (localStorage.getItem("keySave") !== null) {
+            key = localStorage.getItem("keySave");
+            document.getElementById("key").value = localStorage.getItem("keySave");
+            getRotors();
+        }
     }
     input.addEventListener("keyup", e => {
         if (e.key === " ") {
-            input.textContent += " ";
             output.textContent += " ";
         } else if (e.key === "Control") {
             if (mode === "encode") {
@@ -172,14 +188,9 @@
                 document.getElementById("status").textContent = "ENCODING";
             }
         } else if (e.key === "Backspace") {
-            r1,r2,r3,r4,r5,r6 = "";
-            getRotors();
-            input.value = "";
-            output.textContent = "";
-            cycle = 0;
+            location.reload();
         } else if (alpha.includes(e.key.toUpperCase())) {
         if (mode === "encode") {
-        input.textContent += e.key.toUpperCase();
         var e1 = r1.indexOf(e.key.toUpperCase());
         var e2 = r2[e1];
         var e3 = r3.indexOf(e2);
@@ -233,7 +244,6 @@
             }
         }
     } else if (mode === "decode") {
-        input.textContent += e.key.toUpperCase();
         var d1 = r6.indexOf(e.key.toUpperCase());
         var d2 = r5[d1];
         var d3 = r4.indexOf(d2);
@@ -291,6 +301,7 @@
     })
     document.getElementById("key").addEventListener("keyup", e => {
         key = document.getElementById("key").value.toUpperCase();
+        localStorage.setItem("keySave", key);
         getRotors();
     })
 </script>
