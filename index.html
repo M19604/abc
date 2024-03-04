@@ -177,7 +177,9 @@
         }
     }
     input.addEventListener("keyup", e => {
-        if (e.key === " ") {
+        if (e.key === " " && mode === "encode") {
+            output.textContent += "_";
+        } else if (e.key === "_" && mode === "decode") {
             output.textContent += " ";
         } else if (e.key === "Control") {
             if (mode === "encode") {
